@@ -39,14 +39,34 @@ class opAuthLoginFormRedmine extends opAuthLoginForm
     $conn = $this->getAuthAdapter()->getRedmineConnection();
 
     $sql = 'SELECT id FROM users WHERE login = ? AND hashed_password = ? AND status = ?';
-    $isValid = (bool)$conn->fetchOne($sql, array($values['redmine_username'], sha1($values['password']), 1));
-    if (!$isValid)
+    $userId = $conn->fetchOne($sql, array($values['redmine_username'], sha1($values['password']), 1));
+    if (!$userId)
     {
       throw new sfValidatorError($validator, 'Failed to redmine authentication');
     }
 
     $validator = new opAuthValidatorMemberConfig(array('config_name' => 'redmine_username'));
     $result = $validator->clean($values);
+
+    // regenerate api token
+    if (isset($result['member']))
+    {
+      $sql = 'SELECT id FROM tokens WHERE user_id = ? AND action = ?';
+      $currentTokenId = $conn->fetchOne($sql, array($userId, 'api'));
+
+      $newToken = sha1(time().$result['member']->id);
+
+      if ($currentTokenId)
+      {
+        $conn->execute('UPDATE tokens SET value = ? WHERE id = ?' , array($newToken, $currentTokenId));
+      }
+      else
+      {
+        $conn->execute('INSERT INTO tokens VALUES (NULL, ?, ?, ?, NOW())', array($userId, 'api', $newToken));
+      }
+
+      $result['member']->setConfig('redmine_api_token', $newToken);
+    }
 
     return $result;
   }
