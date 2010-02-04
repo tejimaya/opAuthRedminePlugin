@@ -1,0 +1,14 @@
+redmine_dsn:
+  Default: ""
+
+register_account_url:
+  Default: ""
+
+enable_mobile:
+  Default: 0
+
+enable_pc:
+  Default: 0
+
+admin_invite:
+  Default:  false
