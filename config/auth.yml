@@ -12,3 +12,6 @@ enable_pc:
 
 admin_invite:
   Default:  false
+
+self_invite_action:
+  Default: "redmineAuth/toRedmineRegistration"
