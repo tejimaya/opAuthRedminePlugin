@@ -37,6 +37,10 @@ class opAuthAdapterRedmine extends opAuthAdapter
       $this->appendMemberInformationFromRedmine($member);
 
       $member->save();
+      if (method_exists($member, 'generateRegisterToken'))
+      {
+        $member->generateRegisterToken();
+      }
 
       $result = $member->getId();
     }
