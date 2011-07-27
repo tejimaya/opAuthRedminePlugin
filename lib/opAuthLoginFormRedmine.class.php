@@ -38,7 +38,7 @@ class opAuthLoginFormRedmine extends opAuthLoginForm
   {
     $conn = $this->getAuthAdapter()->getRedmineConnection();
 
-    $sql = 'SELECT id FROM users WHERE login = ? AND hashed_password = ? AND status = ?';
+    $sql = 'SELECT id FROM users WHERE login = ? AND hashed_password = SHA1(CONCAT(salt, ?)) AND status = ?';
     $userId = $conn->fetchOne($sql, array($values['redmine_username'], sha1($values['password']), 1));
     if (!$userId)
     {
